@@ -17,20 +17,16 @@ var EventEmitter = require('events').EventEmitter
 
 function collector (opts) {
   var emitter = new EventEmitter()
-  function emit (data) {
-    emitter.emit('data', data)
-  }
-  function err (err) {
-    emitter.emit('err', err)
-  }
   var openbci = require('./openbci')
   var server = require('./server')
   var eeg = openbci(opts)
   var s = server(opts.port, function () {
+    let emit = d => emitter.emit('data', d)
+    let err = e => emitter.emit('error', e)
     s.on('error', err)
     eeg.on('error', err)
     s.on('post', emit)
-    eeg.on('buffer', emit)
+    eeg.on('reading', emit)
   })
   emitter.close = function () {
     eeg.disconnect()

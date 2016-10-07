@@ -37,21 +37,26 @@ function openBCI (opts) {
         emitter.emit('error', 'No port found!')
         return
       }
-      if (opts.debug) console.log('found', portName)
+      if (opts.debug)
+        console.log('found', portName)
       ourBoard.connect(portName)
       ourBoard.on('ready',function() {
-        if (opts.debug)
+        var sampleRate = ourBoard.sampleRate()
+        // var timeSyncPossible = ourBoard.usingVersionTwoFirmware()
+
+        if (opts.debug) {
           console.log('connected, ready')
+          console.log('sample rate', sampleRate)
+          // console.log('time sync possible', timeSyncPossbile)
+        }
         ourBoard.streamStart()
         ourBoard.on('sample',function(sample) {
-          if (opts.debug)
-            console.log('volts (index is channel)',
-                        sample)
           buff.push(sample)
           if (buff.length==opts.buffer) {
             emitter.emit('reading', {
               type: 'openbci',
-              buffer: buff
+              buffer: buff,
+              sampleRate: sampleRate,
             })
             buff = []
           }
