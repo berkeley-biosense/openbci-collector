@@ -1,45 +1,28 @@
-var EventEmitter = require('events').EventEmitter
-var OpenBCIBoard = require('openbci').OpenBCIBoard
-// opts is
-//   {
-//     debug (boolean)
-//     chanelVolts (boolean)
-//     simulate (boolean)
-// }
-// returns an emitter
-// emitter will emit
-//   - 'sample' (with an array of volts)
-//   - 'error'
-function openBCI (opts) {
-  var emitter = new EventEmitter()
-  var ourBoard = new OpenBCIBoard({
-    simulate: opts.simulate,
-  })
-  ourBoard
-    .autoFindOpenBCIBoard()
-    .then(function(portName) {
-      if (!portName && !opts.simulate) {
-        emitter.emit('error', 'No port found!')
-        return
-      }
-      if (opts.debug) console.log('found', portName)
-      ourBoard.connect(portName)
-      ourBoard.on('ready',function() {
-        if (opts.debug) console.log('connected, ready')
-        ourBoard.streamStart()
-        ourBoard.on('sample',function(sample) {
-          // makes 'sample' event emit
-          // an array of volts indexed by channel
-          if (opts.channelVolts)
-            sample = sample.channelData.map(x => x.toFixed(8))
-          if (opts.debug)
-            console.log('volts (index is channel)', sample)
-          emitter.emit('sample', sample)
-        })
-      })
-    }).catch(err => emitter.emit("error", err))
+/*
 
-      return emitter
+  TODO module should return a kefir stream
+  TODO We want to buffer EEG values somehow
+
+  opts is
+
+  {
+    port: 9998,      // listen for POST requests on this port
+    simulate: true,  // simulate an openBCI
+    debug: true,     // console.log gratuitiously
+  }
+
+  */
+
+function collector (opts) {
+  var openbci = require('./openbci')
+  var server = require('./server')
+  var s = server(opts.port, function () {
+    var eeg = openbci(opts)
+    s.on('error', function (err) {})
+    s.on('post', function (post) {})
+    eeg.on('error', function (err) {})
+    eeg.on('sample', function (sample) {})
+  })
 }
 
-module.exports = openBCI
+module.exports = collector
