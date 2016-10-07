@@ -1,7 +1,7 @@
 var openbci = require('..')
-var eeg = openbci({ 
+var eeg = openbci({
   debug: true,
-  simulate: false,
+  simulate: true,
 })
 eeg.on("error", err => console.log('ERR!', err))
 eeg.on("reading", reading => console.log(reading))
