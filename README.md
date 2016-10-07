@@ -1,10 +1,8 @@
-# empty-module
+# openbci-collector
 
-description
+[WIP]
 
-<!-- see [details.md](details.md). -->
-
-<!-- (interested in contributing?) see [CONTRIBUTING.md](CONTRIBUTING.md). -->
+collect data from openbci
 
 ## example
 
