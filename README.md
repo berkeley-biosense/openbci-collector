@@ -4,11 +4,18 @@
 
 collect raw data from openbci, and expose a port on localhost to listen for POST requests (for metadata about stimulus prsentations)
 
-## use
+## quick start
 
 first, set up your open BCI, and plug in the bluetooth dongle
 
-then, you could write something like this:
+then, clone this repo and
+
+```
+npm i 
+node example.js
+```
+
+## example
 
 ```javascript
 var collector = require('..')({
@@ -39,13 +46,6 @@ meanwhile, you can send post requests to `http://localhost:[your port]`. the POS
 }
 ```
 
-## install
-
-clone this repo and
-
-```
-npm i 
-```
 
 ## license
 
