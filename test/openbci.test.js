@@ -1,17 +1,19 @@
 var test = require('tape')
 var eeg = null
 test('can simulate openbci', t => {
-  t.plan(3)
+  t.plan(4)
   var openbci = require('../src/openbci')
   eeg = openbci({
-    debug: false,
     simulate: true,
+    buffer: 250,
   })
   eeg.on('error', t.notOk)
-  eeg.on('sample', reading => {
-    t.ok(reading)
-    t.ok(reading.channelData)
-    t.equal(reading.channelData.length, 8)
+  eeg.on('reading', samples => {
+    t.ok(samples)
+    t.deepEquals(samples.type, 'openbci')
+    t.ok(samples.buffer.length)
+    t.equal(samples.buffer[0].channelData.length, 8)
+    // console.log(samples)
     eeg.removeAllListeners('sample')
   })
 })
