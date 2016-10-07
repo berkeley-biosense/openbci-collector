@@ -5,6 +5,7 @@ test('can simulate openbci', t => {
   var openbci = require('../src/openbci')
   eeg = openbci({
     simulate: true,
+    debug: true,
     buffer: 250,
   })
   eeg.on('error', t.notOk)

@@ -19,7 +19,7 @@ var OpenBCIBoard = require('openbci').OpenBCIBoard
     - 'error'
 
   emitter also has a method `disconnect()`
-
+  timeSyncPossible = ourBoard.usingVersionTwoFirmware();
 */
 
 function openBCI (opts) {
@@ -42,12 +42,12 @@ function openBCI (opts) {
       ourBoard.connect(portName)
       ourBoard.on('ready',function() {
         var sampleRate = ourBoard.sampleRate()
-        // var timeSyncPossible = ourBoard.usingVersionTwoFirmware()
+        var canTimeSync = ourBoard.usingVersionTwoFirmware()
 
         if (opts.debug) {
           console.log('connected, ready')
-          console.log('sample rate', sampleRate)
-          // console.log('time sync possible', timeSyncPossbile)
+          console.log('sample rate:', sampleRate)
+          console.log('can time sync', canTimeSync)
         }
         ourBoard.streamStart()
         ourBoard.on('sample',function(sample) {
