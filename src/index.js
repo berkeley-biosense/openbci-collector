@@ -2,7 +2,8 @@ var EventEmitter = require('events').EventEmitter
 var append = require('fs').appendFile
 var join = require('path').join
 function stringify (reading) {
-  return JSON.strinigfy(reading)
+  let volts = reading.buffer.map(r => r.channelData)
+  return volts.join('\n')
 }
 var mkdir = require('mkdir-p')
 /*
@@ -64,7 +65,8 @@ function collector (opts) {
           // if (opts.debug)
           //   console.log('recieved reading', recording)
           if (recording && outfile) {
-            console.log('appending reading to', outfile)
+            if (opts.debug)
+              console.log('appending reading to', outfile)
             append(outfile, stringify(r), function (err) {
               if (err)
                 throw err

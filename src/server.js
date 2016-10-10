@@ -48,8 +48,9 @@ function handleRequest (req, res, next) {
     res.send(202)
     return next()
   }
+  console.log('this one is not valid, sending 422', req.body)
   // bad data -> 422 UnprocessableEntityError
-  var msg = 'Invalid request.'
+  var msg = 'Invalid post schema.'
   emitter.emit('error', msg)
   return next(
     new restify.UnprocessableEntityError(msg))

@@ -1,7 +1,7 @@
 var test = require('tape')
 var s = null
 test('testing server', t => {
-  t.plan(6)
+  t.plan(5)
   var server = require('../src/server')
   var port = 9998
   s = server(port, function () {
@@ -21,9 +21,10 @@ test('testing server', t => {
     client.post('/',
                 { beep: 'boop' },
                 function (err, res, body) {
+                  console.log(body)
                   t.equal(res.statusCode,
-                          422,
-                          'bad schema data 422')})
+                          500,
+                          'bad schema data 500')})
     client.post('/',
                 { type: 'beep', beep: 'boop' },
                 function (err, res, body) {

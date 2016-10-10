@@ -15,7 +15,7 @@ var outdir = join(__dirname, '/e2e-test-output/')
 var c = null
 test('test collection protocol', t => {
   c = collector({
-    debug: true,
+    // debug: true,
     port: port,
     simulate: true,
     buffer: 50,
@@ -28,7 +28,7 @@ test('test collection protocol', t => {
       t.notOk(err)
       t.equals(202, res.statusCode,
               'response should be 202')
-      console.log(body)
+      // console.log(body)
       // wait 15 seconds (little over our wait time)
       function checkCSV () {
         var readdir = require('fs').readdirSync
@@ -40,7 +40,14 @@ test('test collection protocol', t => {
             })[0]
         var read = require('fs').readFileSync
         var contents = read(join(outdir, outfile)).toString()
-        t.ok(contents, contents)
+        var entries = contents.split('\n')
+        t.ok(entries,
+             "there are lines of the file")
+        t.ok(entries.length>120,
+                 "more than 120 entries")
+        var firstEntry = entries[0].split(',')
+        t.ok(firstEntry.length, 8,
+            'there are 8 voltage items in the first logged entry')
         t.end()
       }
       setTimeout(checkCSV, 1300)

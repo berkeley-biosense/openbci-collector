@@ -15,7 +15,7 @@ test('can simulate openbci', t => {
     t.ok(samples.buffer.length)
     t.equal(samples.buffer[0].channelData.length, 8)
     // console.log(samples)
-    eeg.removeAllListeners('sample')
+    eeg.removeAllListeners('reading')
   })
 })
 
