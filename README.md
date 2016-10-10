@@ -6,46 +6,36 @@ collect raw data from openbci, and expose a port on localhost to listen for POST
 
 ## quick start
 
-first, set up your open BCI, and plug in the bluetooth dongle
-
-then, clone this repo and
+first, clone the repo and install
 
 ```
+git clone https://github.com/elsehow/openbci-collector
+cd openci-collector
 npm i 
-node example.js
 ```
 
-## example
+now, simulate an open BCI device, and listen for 'start-recording' on port `8889`, logging data to a directory called `out/`
 
-```javascript
-var collector = require('..')({
-  port: 8881,     // listen for POST reqs on this port
-  buffer: 250,    // # of raw EEG readings per buffer
-  simulate: true, // simulate an openBCI (for debug)
-  debug: true,    // console.log gratuitously
-})
-
-collector.on('data', d => {
-  console.log('got data!', d)})
-
-collector.on('error', err => {
-  console.log('ERR!', err)})
-
-// close
-setTimeout(collector.close, 1000)
+```
+./cmd.js --port=8889 --outdir=out/ --simulate=true
 ```
 
-data from OpenBCI should be coming through
+to log some data, send a JSON POST request to `http://localhost:8889` with the form:
 
-meanwhile, you can send post requests to `http://localhost:[your port]`. the POSTed json will have to include a "type" string, but can contain anything else. so, this would be valid:
-
-```json
+```python
 {
-  "type": "this-string-is-required",
-  "foo": { "bar": "this can be whatever" }
+  "type": "start-recording",
+  "tag": "breath", # tag - probably task name
+  "duration": 12, # duration of recording, in seconds
+  "sid": 15, # subject ID
 }
 ```
 
+## complete CLI usage
+
+```sh
+./cmd.js --port=[required] --outdir=[required] --simulate=[false] --debug=[true] --buffer=[250]
+```
 
 ## license
 
