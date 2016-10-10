@@ -22,7 +22,7 @@ var collector = require('..')({
   port: 8881,     // listen for POST reqs on this port
   buffer: 250,    // # of raw EEG readings per buffer
   simulate: true, // simulate an openBCI (for debug)
-  debug: true,    // console.log gratuitiously
+  debug: true,    // console.log gratuitously
 })
 
 collector.on('data', d => {
