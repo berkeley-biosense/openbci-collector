@@ -25,6 +25,7 @@ var OpenBCIBoard = require('openbci').OpenBCIBoard
 function openBCI (opts) {
   if (!opts.buffer)
     opts.buffer = 250
+  var ready = false
   var buff = []
   var emitter = new EventEmitter()
   var ourBoard = new OpenBCIBoard({
@@ -43,7 +44,6 @@ function openBCI (opts) {
       ourBoard.on('ready',function() {
         var sampleRate = ourBoard.sampleRate()
         var canTimeSync = ourBoard.usingVersionTwoFirmware()
-
         if (opts.debug) {
           console.log('connected, ready')
           console.log('sample rate:', sampleRate)
@@ -51,6 +51,10 @@ function openBCI (opts) {
         }
         ourBoard.streamStart()
         ourBoard.on('sample',function(sample) {
+          if (!ready) {
+            emitter.emit('ready')
+            ready=true
+          }
           buff.push(sample)
           if (buff.length==opts.buffer) {
             emitter.emit('reading', {
