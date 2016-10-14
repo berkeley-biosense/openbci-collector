@@ -1,84 +1,91 @@
 var EventEmitter = require('events').EventEmitter
 var append = require('fs').appendFile
+var mkdir = require('mkdir-p')
 var join = require('path').join
+
 function stringify (reading) {
   return reading.buffer
     .map(r => r.channelData.join(','))
     .join('\n')+'\n'
 }
 
-var mkdir = require('mkdir-p')
-/*
-
-  TODO module should return a kefir stream
-
-  opts is
-
-  {
-    port: 9998,      // listen for POST requests on this port
-    simulate: true,  // simulate an openBCI
-    debug: true,     // console.log gratuitiously
-    buffer: 250,     // # of raw EEG readings per buffer
-    outfile: 'out.csv' // csv file to save stuff in
-  }
-
-  */
-
+// validate start recording messages
+function validate (p) {
+  if (p.type === 'start-recording')
+    if (typeof p.duration === 'number')
+      return true
+  return false
+}
 
 function collector (opts) {
   if (!opts.outdir)
     opts.outdir = 'out/'
-  var recording = false
-  var openbci = require('./openbci')
   var server = require('./server')
-  var outfile = null
+  var openbci = require('./openbci')
   var emitter = new EventEmitter()
   var emit = ev => x => emitter.emit(ev, x)
   var err = e => emitter.emit('error', e)
+  // references we leave around
   var eeg = null
-  var s = server(opts.port, function () {
-    mkdir(opts.outdir, function () {
-      eeg = openbci(opts)
-      eeg.on('ready', function () {
-        emit('ready')()
-        s.on('error', err)
-        eeg.on('error', err)
-        s.on('post', function (p) {
-          // if post type == start-recording
-          if (p.type === 'start-recording') {
-            if (opts.debug)
-              console.log('got start-recording message!',
-                          JSON.stringify(p))
-            if (typeof p.duration === 'number') {
-              recording = true
-              outfile = join(
-                opts.outdir,
-                `${p.sid}.${p.tag}.${Date.now()}.csv`)
-              let timeout = p.duration*1000 // convert sec to ms
-              setTimeout(() => recording=false, timeout)
-            }
-            else
-              throw 'Post duration is not a number!: ' +
-              JSON.stringify(p)
-          }
-          emit('post')(p) // emit post
-        })
-        eeg.on('reading', function (r) {
-          // if (opts.debug)
-          //   console.log('recieved reading', recording)
-          if (recording && outfile) {
-            if (opts.debug)
-              console.log('appending reading to', outfile)
-            append(outfile, stringify(r), function (err) {
+  var s = null
+  // mutable state
+  var ongoingRecordings = {} // this will look like:
+  //                            {  filename: { framesRecorded, framesTotal }  }
+  var sampleRate = null
+
+  // get start-recording messages
+  // adds stuff to ongoingRecordings
+  function handlePost (sampleRate) {
+    return function (p) {
+      // returns post handler function (p) { }
+      if (validate(p)) {
+        if (opts.debug) console.log('got start-recording message!', JSON.stringify(p))
+        let filename = join(
+          opts.outdir,
+          `${p.sid}.${p.tag}.${Date.now()}.csv`)
+        ongoingRecordings[filename] = {
+          framesRecorded: 0,
+          framesTotal: sampleRate * p.duration,
+        }
+        emit('post')(p) // emit post
+      }
+    }
+  }
+
+  function handleReading (r) {
+    // if (opts.debug)
+    //   console.log('recieved reading', recording)
+    if (ongoingRecordings) {
+      if (opts.debug)
+        console.log('appending reading to', outfile)
+      let filenames = Object.keys(ongoingRecordings)
+          .forEach(filename => {
+            append(filename, stringify(r), function (err) {
               if (err)
                 throw err
+              let rec = ongoingRecordings[filename]
+              let recorded = rec.framesRecorded+=1
+              let total = ongoingRecordings[filename].totalFrames
+              if (recorded >= total)
+                delete(ongoingRecordings, filename)
             })
-          }
-          emit('reading')(r)
-        })
+          })
+    }
+  }
+
+  s = server(opts.port, function () {
+    mkdir(opts.outdir, function () {
+      eeg = openbci(opts)
+      eeg.on('ready', function (sampleRate) {
+        emit('ready')(sampleRate)
+        s.on('error', err)
+        eeg.on('error', err)
+        s.on('post', handlePost(sampleRate))
+        eeg.on('reading', handleReading)
       })
     })
   })
+
   emitter.close = function () {
     eeg.disconnect()
     s.close()

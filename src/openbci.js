@@ -52,7 +52,7 @@ function openBCI (opts) {
         ourBoard.streamStart()
         ourBoard.on('sample',function(sample) {
           if (!ready) {
-            emitter.emit('ready')
+            emitter.emit('ready', sampleRate)
             ready=true
           }
           buff.push(sample)
