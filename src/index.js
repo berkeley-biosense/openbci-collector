@@ -2,9 +2,11 @@ var EventEmitter = require('events').EventEmitter
 var append = require('fs').appendFile
 var join = require('path').join
 function stringify (reading) {
-  let volts = reading.buffer.map(r => r.channelData)
-  return volts.join('\n')
+  return reading.buffer
+    .map(r => r.channelData.join(','))
+    .join('\n')+'\n'
 }
+
 var mkdir = require('mkdir-p')
 /*
 

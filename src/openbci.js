@@ -15,7 +15,7 @@ var OpenBCIBoard = require('openbci').OpenBCIBoard
 
   returns an emitter
   emitter will emit
-    - 'reading' 
+    - 'reading'
     - 'error'
 
   emitter also has a method `disconnect()`
