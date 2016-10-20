@@ -20,6 +20,8 @@ function validate (p) {
 function collector (opts) {
   if (!opts.outdir)
     opts.outdir = 'out/'
+  if (!opts.buffer)
+    opts.buffer=250
   var server = require('./server')
   var openbci = require('./openbci')
   var emitter = new EventEmitter()
@@ -64,7 +66,7 @@ function collector (opts) {
               if (err)
                 throw err
               let rec = ongoingRecordings[filename]
-              let recorded = rec.framesRecorded+=1
+              let recorded = rec.framesRecorded+=opts.buffer
               let total = ongoingRecordings[filename].totalFrames
               if (recorded >= total)
                 delete(ongoingRecordings, filename)

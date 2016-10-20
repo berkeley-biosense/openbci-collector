@@ -34,6 +34,8 @@ var start_record_message = {
 var c = null
 
 test('record 2 things simultaneously', t => {
+  var sampleRate = 250
+  var buffSize = 50
   function checkBothCSVs () {
     var outs = outfiles()
     t.equals(outs.length, 2, 'there are 2 outfiles')
@@ -46,15 +48,18 @@ test('record 2 things simultaneously', t => {
             'all lines of csv length 8')
     t.ok(entries,
          "there are lines of the file")
-    t.ok(entries.length>249,
-         'after 1 sec, number of entries > 249')
+    var recorded = entries.length-1
+    t.ok(recorded==250 || recorded==300,
+        'either 250 or 300 readings')
+    // t.equal(1*250, entries.length,
+    //      'after 1 sec, number of entries == 12*250')
     t.end()
   }
   c = collector({
     // debug: true,
     port: port,
     simulate: true,
-    buffer: 50,
+    buffer: buffSize,
     outdir: outdir,
   })
   c.on('ready', function  () {
