@@ -23,8 +23,6 @@ var OpenBCIBoard = require('openbci').OpenBCIBoard
 */
 
 function openBCI (opts) {
-  if (!opts.buffer)
-    opts.buffer = 250
   var ready = false
   var buff = []
   var emitter = new EventEmitter()

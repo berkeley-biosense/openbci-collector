@@ -39,15 +39,11 @@ function collector (opts) {
 
     // returns post handler function (p) { }
     return function (p) {
-
       if (validate(p)) {
-
         if (opts.debug)
           console.log('got start-recording message!', JSON.stringify(p))
-
         let filename = `${p.sid}.${p.tag}.${Date.now()}.csv`
         let path = join(opts.outdir, filename)
-
         ongoingRecordings[path] = {
           framesRecorded: 0,
           framesTotal: sampleRate * p.duration,
@@ -62,7 +58,7 @@ function collector (opts) {
     //   console.log('recieved reading', recording)
     if (ongoingRecordings) {
       if (opts.debug)
-        console.log('appending reading to', outfile)
+        console.log('appending reading to', opts.outfile)
       let filenames = Object.keys(ongoingRecordings)
           .forEach(filename => {
             append(filename, stringify(r), function (err) {

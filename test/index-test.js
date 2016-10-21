@@ -24,10 +24,12 @@ function every (arr, pred) {
   }, true)
 }
 
+var seconds = 5
+
 var start_record_message = {
   "type": "start-recording",
   "tag": "breath", // tag - probably task name
-  "duration": 1, // duration of recording, in seconds
+  "duration": seconds, // duration of recording, in seconds
   "sid": 15, // subject id
 }
 
@@ -47,7 +49,7 @@ test('record 2 things simultaneously', t => {
     t.ok(entries,
          "there are lines of the file")
     var recorded = entries.length-1
-    t.ok(recorded==sampleRate,
+    t.equal(seconds*sampleRate, recorded,
          'number of readings we recorded === sample rate, bc we recorded for 1 sec')
   }
 
@@ -70,7 +72,7 @@ test('record 2 things simultaneously', t => {
 
   c.on('ready', function  () {
     var client = request.createClient('http://localhost:'+port+'/')
-    setTimeout(checkBothCSVs, 1500)
+    setTimeout(checkBothCSVs, (seconds*1000)+500)
     // post a record message
     client.post('/', start_record_message, function (_) {
       client.post('/', start_record_message, function (err, res, body) {
