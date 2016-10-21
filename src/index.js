@@ -53,24 +53,25 @@ function collector (opts) {
     }
   }
 
-  function handleReading (r) {
-    // if (opts.debug)
-    //   console.log('recieved reading', recording)
-    if (ongoingRecordings) {
-      if (opts.debug)
-        console.log('appending reading to', opts.outfile)
-      let filenames = Object.keys(ongoingRecordings)
-          .forEach(filename => {
-            append(filename, stringify(r), function (err) {
-              if (err)
-                throw err
-              let rec = ongoingRecordings[filename]
-              let recorded = rec.framesRecorded+=opts.buffer
-              let total = ongoingRecordings[filename].totalFrames
-              if (recorded >= total)
-                delete(ongoingRecordings, filename)
+  function handleReading (sampleRate) {
+    return function (r) {
+      if (Object.keys(ongoingRecordings).length > 0) {
+        let filenames = Object.keys(ongoingRecordings)
+            .forEach(filename => {
+              if (opts.debug)
+                console.log('appending reading to', filename)
+              append(filename, stringify(r), err => {
+                if (err) throw err
+                ongoingRecordings[filename].framesRecorded+=sampleRate
+                let recorded = ongoingRecordings[filename].framesRecorded
+                let total = ongoingRecordings[filename].framesTotal
+                if (recorded == total) {
+                  emit('done-recording')(filename)
+                  delete ongoingRecordings[filename]
+                }
+              })
             })
-          })
+      }
     }
   }
 
@@ -82,7 +83,7 @@ function collector (opts) {
         s.on('error', err)
         eeg.on('error', err)
         s.on('post', handlePost(sampleRate))
-        eeg.on('reading', handleReading)
+        eeg.on('reading', handleReading(sampleRate))
       })
     })
   })
