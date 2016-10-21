@@ -24,7 +24,7 @@ function every (arr, pred) {
   }, true)
 }
 
-var seconds = 10
+var seconds = 2
 
 var start_record_message = {
   "type": "start-recording",
