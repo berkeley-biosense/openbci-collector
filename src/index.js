@@ -20,8 +20,6 @@ function validate (p) {
 function collector (opts) {
   if (!opts.outdir)
     opts.outdir = 'out/'
-  if (!opts.buffer)
-    opts.buffer=250
   var server = require('./server')
   var openbci = require('./openbci')
   var emitter = new EventEmitter()
@@ -38,14 +36,19 @@ function collector (opts) {
   // get start-recording messages
   // adds stuff to ongoingRecordings
   function handlePost (sampleRate) {
+
+    // returns post handler function (p) { }
     return function (p) {
-      // returns post handler function (p) { }
+
       if (validate(p)) {
-        if (opts.debug) console.log('got start-recording message!', JSON.stringify(p))
-        let filename = join(
-          opts.outdir,
-          `${p.sid}.${p.tag}.${Date.now()}.csv`)
-        ongoingRecordings[filename] = {
+
+        if (opts.debug)
+          console.log('got start-recording message!', JSON.stringify(p))
+
+        let filename = `${p.sid}.${p.tag}.${Date.now()}.csv`
+        let path = join(opts.outdir, filename)
+
+        ongoingRecordings[path] = {
           framesRecorded: 0,
           framesTotal: sampleRate * p.duration,
         }
