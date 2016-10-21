@@ -6,7 +6,6 @@ test('can simulate openbci', t => {
   eeg = openbci({
     simulate: true,
     debug: true,
-    buffer: 250,
   })
   eeg.on('error', t.notOk)
   eeg.on('reading', samples => {

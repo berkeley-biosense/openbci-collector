@@ -56,7 +56,7 @@ function openBCI (opts) {
             ready=true
           }
           buff.push(sample)
-          if (buff.length==opts.buffer) {
+          if (buff.length==sampleRate) {
             emitter.emit('reading', {
               type: 'openbci',
               buffer: buff,
